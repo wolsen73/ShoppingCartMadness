@@ -5,12 +5,12 @@ public class Player {
 
 	private ImageIcon playerIcon;
 	private Point playerPos;
-	private int moveDistance = 80;
+	private int moveDistance = 40;
 	
 	
 	public Player () {
-		playerIcon = new ImageIcon("ShoppingCartRight.png");
-		playerPos = new Point(400, 670);
+		playerIcon = new ImageIcon("ShoppingCartDude.png");
+		playerPos = new Point(260, 460);
 	}
 
 	public ImageIcon getPlayerIcon () {return playerIcon;}

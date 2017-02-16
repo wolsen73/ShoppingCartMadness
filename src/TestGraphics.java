@@ -10,6 +10,6 @@ public class TestGraphics {
 	  frame.add(s);
 	  frame.setVisible(true);
 	  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	  frame.setSize(800, 800);
+	  frame.setSize(1800, 1020);
   }
 }

@@ -11,7 +11,7 @@ public class second extends JPanel implements ActionListener, KeyListener {
 	
 	private static final long serialVersionUID = 1L;
 	public Timer timer = new Timer(5, this);
-	private ImageIcon background = new ImageIcon("ParkingLot.png");
+	private ImageIcon background = new ImageIcon("WholeFoodsParkingLot.png");
 	private Player player = new Player();
 	
   public second() {
