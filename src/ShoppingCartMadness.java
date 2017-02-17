@@ -1,6 +1,6 @@
 import javax.swing.JFrame;
 
-public class TestGraphics {
+public class ShoppingCartMadness {
 
   public static void main(String[] args) {
   
