@@ -2,15 +2,14 @@ package shoppingcartmadness;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import javax.swing.*;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static shoppingcartmadness.Player.PLAYER_IMG;
+import java.util.logging.*;
 
 //---------------------------------------------- Gameplay Class ----------------------------------------------
+
 public class Gameplay extends JPanel implements ActionListener, KeyListener {
+
+//---------------------------------------------- Member Functions --------------------------------------------
 
     public static int FRAME_HEIGHT = 940;
     public static int FRAME_WIDTH = 1800;
@@ -29,8 +28,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
     private static Point COM_POINT7 = new Point(1700, 600);
     private static Point COM_POINT8 = new Point(1700, 700);
     private static Point COM_POINT9 = new Point(1700, 800);
-    private static int GAME_LOOP_PAUSE = 100; // milliseconds
-    private static int LIVES_PER_GAME = 3;
+    private static int GAME_LOOP_PAUSE = 30; // milliseconds
     private static int NUM_COMPLETION_POINTS = 9;
     private static final long serialVersionUID = 1L;
 
@@ -41,69 +39,55 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
         COM_POINT5, COM_POINT6, COM_POINT7, COM_POINT8, COM_POINT9};
     private int gameLoopIteration = 0;
     private ParkingLot parkingLot = new ParkingLot();
-    private Player player;
+    private Player player = new Player();
 
 //---------------------------------------------- Member Functions --------------------------------------------
+    
     public Gameplay() {
-        timer.start();
-        addKeyListener(this);
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
+      timer.start();
+      addKeyListener(this);
+      setFocusable(true);
+      setFocusTraversalKeysEnabled(false);
 
-        // Lambda Runnable for game loop to keep the UI responsive
-        Runnable task2 = () -> {
-            gameLoop();
-        };
-        // start the thread
-        new Thread(task2).start();
+      // Lambda Runnable for game loop to keep the UI responsive
+      Runnable task2 = () -> {gameLoop();};
+      new Thread(task2).start();
     }
 
-    /**
-     *
-     * @param e
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        repaint();
-    }
-
-    @Override
+    public void actionPerformed(ActionEvent e) {repaint();}
+    public void keyReleased(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {}
+    
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         player.setMoveCode(code);
     }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // not used
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // not used
-    }
-
-    @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        parkingLot.getMapImage().paintIcon(this, g, 0, 0);
-        player.getPlayerImage().paintIcon(this, g, player.getPlayerPos().x,
-                player.getPlayerPos().y);
-        //set cars
-        for (int i = 0; i < cars.length; i++) {
-
-            cars[i].getIcon().paintIcon(this, g, cars[i].getPosition().x,
-                    cars[i].getPosition().y);
+      super.paintComponent(g);
+      parkingLot.getMapImage().paintIcon(this, g, 0, 0);
+      player.getPlayerImage().paintIcon(this, g, player.getPosition().x, player.getPosition().y);
+      
+      // Paint parked cars
+      for (int i = 0; i < ParkingLot.parkedCars.size(); i++) {
+      	ParkingLot.parkedCars.get(i).getImage().paintIcon(this, g, 
+      			ParkingLot.parkedCars.get(i).getPosition().x,
+      			ParkingLot.parkedCars.get(i).getPosition().y);
+      }
+      
+      // Set cars
+      for (int i = 0; i < cars.length; i++) {
+        cars[i].getIcon().paintIcon(this, g, cars[i].getPosition().x, cars[i].getPosition().y);
+      }
+      
+      for (int i = 0; i < cartsCompleted.length; i++) {
+        CartCompletion cart = cartsCompleted[i];
+        if (cart != null) {
+          cartsCompleted[i].getIcon().paintIcon(this, g,
+        	cartsCompleted[i].getPosition().x,
+          cartsCompleted[i].getPosition().y);
         }
-        for (int i = 0; i < cartsCompleted.length; i++) {
-            CartCompletion cart = cartsCompleted[i];
-            if (cart != null) {
-                cartsCompleted[i].getIcon().paintIcon(this, g,
-                        cartsCompleted[i].getPosition().x,
-                        cartsCompleted[i].getPosition().y);
-            }
-        }
-
+      }
     }
 
     /**
@@ -128,29 +112,27 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
     private void gameLoop() {
 
         initCars();
-        player = new Player();
+        parkingLot.increaseLevel();
 
         // ask player if they want to start a game(for now, assume they do)
         //if no, exit program
         // if yes, set life to 3
-        player.setLives(LIVES_PER_GAME);
         while (true) {
 
-            try {
-                Thread.sleep(GAME_LOOP_PAUSE);
-            } catch (InterruptedException ex) {
+            try {Thread.sleep(GAME_LOOP_PAUSE);} 
+            catch (InterruptedException ex) {
                 Logger.getLogger(Gameplay.class.getName()).log(Level.SEVERE, null, ex);
             }
             gameLoopIteration++;
             //check to see if player is spawned
-            if (!player.getAlive()) {
+            if (!player.isAlive()) {
                 // if no, check to see if player has a life left
                 int lives = player.getLives();
                 if (lives > 0) {
                     // if player has a life - 1
                     player.setLives(lives - 1);
                     player.setAlive(true);
-                    player.setPlayerIcon(new ImageIcon(PLAYER_IMG));
+                    player.setPlayerImage();
                 } else {
                     //if player has no life, display game over( ask to replay?)
                     break;
@@ -159,12 +141,12 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
             }
             //set player position at spawn point
             if (!player.getSpawned()) {
-                player.setPlayerPos(new Point(player.getSpawnPos().x,
+                player.setPosition(new Point(player.getSpawnPos().x,
                         player.getSpawnPos().y));
                 player.setSpawned(true);
             }
 
-            Point playerPostion = player.getPlayerPos();
+            Point playerPostion = player.getPosition();
             for (int i = 0; i < cars.length; i++) {
                 Car car = cars[i];
                 // is player hit?
@@ -174,13 +156,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
                     player.setSpawned(false);
                     player.setAlive(false);
                     // TODO: bad player sound
-                    player.setPlayerIcon(new ImageIcon(Player.PLAYER_DIE_IMG));
+                    player.setDeathImage();
                 }
 
             }
 
             //if player dead, continue
-            if (!player.getAlive()) {
+            if (!player.isAlive()) {
                 continue;
             }
             completion:
@@ -190,6 +172,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
                 if (p.x == playerPostion.x) {
                     // TODO: make good sound
                     // set a green
+                		parkingLot.increaseLevel();
                     CartCompletion cart = new CartCompletion();
                     cart.setPosition(p);
                     insertCompletedCart(cart);
@@ -261,7 +244,6 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
-
     }
 
     /**
@@ -306,7 +288,6 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
 
             }
             cars[i] = car;
-
         }
     }
 
