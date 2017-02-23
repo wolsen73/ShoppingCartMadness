@@ -3,11 +3,12 @@ package shoppingcartmadness;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.logging.*;
 
 //---------------------------------------------- Gameplay Class ----------------------------------------------
 
-public class Gameplay extends JPanel implements ActionListener, KeyListener {
+public class Gameplay extends JPanel implements ActionListener, KeyListener, MouseListener {
 
 //---------------------------------------------- Member Functions --------------------------------------------
 
@@ -17,7 +18,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
     private static int CAR2_HOZ = 700;
     private static int CAR3_HOZ = 1100;
     private static int CAR4_HOZ = 1500;
-    private static int CAR_MOVEMENT_ITERATIONS = 20; // every 1 second (5 loops) move the cars
+    private static int CAR_MOVEMENT_ITERATIONS = 15; // every 1 second (5 loops) move the cars
     private static int CAR_VER = 0;
     private static Point COM_POINT1 = new Point(1700, 0);
     private static Point COM_POINT2 = new Point(1700, 100);
@@ -28,283 +29,299 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
     private static Point COM_POINT7 = new Point(1700, 600);
     private static Point COM_POINT8 = new Point(1700, 700);
     private static Point COM_POINT9 = new Point(1700, 800);
+    
     private static int GAME_LOOP_PAUSE = 30; // milliseconds
     private static int NUM_COMPLETION_POINTS = 9;
     private static final long serialVersionUID = 1L;
-
     public Timer timer = new Timer(5, this);
-    private Car[] cars = new Car[4];// change to constant
-    private CartCompletion[] cartsCompleted = new CartCompletion[NUM_COMPLETION_POINTS];
-    private Point[] completionPoints = {COM_POINT1, COM_POINT2, COM_POINT3, COM_POINT4,
-        COM_POINT5, COM_POINT6, COM_POINT7, COM_POINT8, COM_POINT9};
     private int gameLoopIteration = 0;
     private ParkingLot parkingLot = new ParkingLot();
     private Player player = new Player();
-
+    private Point retryButtonPoint = new Point (500, 500); 
+    private Point quitButtonPoint = new Point (1000, 500);
+    
+    private Car[] cars = new Car[4];// change to constant
+    private ArrayList<CartCompletion> cartsCompleted = 
+    		new ArrayList<CartCompletion>(NUM_COMPLETION_POINTS);
+    private Point[] completionPoints = {COM_POINT1, COM_POINT2, COM_POINT3, COM_POINT4,
+        COM_POINT5, COM_POINT6, COM_POINT7, COM_POINT8, COM_POINT9};
+    
+    private ImageIcon[] levelImages = {new ImageIcon("1.png"), new ImageIcon("2.png"),
+    		new ImageIcon("3.png"), new ImageIcon("4.png"), new ImageIcon("5.png"),
+    		new ImageIcon("6.png"), new ImageIcon("7.png"), new ImageIcon("8.png"),
+    		new ImageIcon("9.png")};
+    private ImageIcon currentLevelImage = new ImageIcon("1.png");
+    private ImageIcon display = new ImageIcon("Display.png");
+    private ImageIcon heart = new ImageIcon("Heart.png");
+    private ImageIcon gameOver = new ImageIcon("GameOver.png");
+    private ImageIcon youWin = new ImageIcon("YouWin.png");
+    private ImageIcon retryButton = new ImageIcon("RetryButton.png");
+    private ImageIcon quitButton = new ImageIcon("QuitButton.png");
+    
 //---------------------------------------------- Member Functions --------------------------------------------
     
-    public Gameplay() {
-      timer.start();
-      addKeyListener(this);
-      setFocusable(true);
-      setFocusTraversalKeysEnabled(false);
+  public Gameplay() {
+    timer.start();
+    addKeyListener(this);
+    addMouseListener(this);
+    setFocusable(true);
+    setFocusTraversalKeysEnabled(false);
 
-      // Lambda Runnable for game loop to keep the UI responsive
-      Runnable task2 = () -> {gameLoop();};
-      new Thread(task2).start();
+    // Lambda Runnable for game loop to keep the UI responsive
+    Runnable task2 = () -> {gameLoop();};
+    new Thread(task2).start();
+  }
+
+  public void actionPerformed (ActionEvent e) {repaint();}
+  public void keyReleased (KeyEvent e) {}
+  public void keyTyped (KeyEvent e) {}
+	public void mouseEntered (MouseEvent e) {}
+	public void mouseExited (MouseEvent e) {}
+  public void mousePressed (MouseEvent e) {}
+  public void mouseClicked(MouseEvent e) {}
+  
+  
+  /**
+   * Handles mouse clicking (button clicking)
+   */
+  public void mouseReleased (MouseEvent e) {
+		if (player.getLives() == 0 || cartAreaFull()) {
+  		int x = e.getX();
+  		int y = e.getY();
+  		
+  		// If player pressed retry button (start new game)
+  		if (x >= retryButtonPoint.x && x <= retryButtonPoint.x + retryButton.getIconWidth())
+  			if (y >= retryButtonPoint.y && y <= retryButtonPoint.y + retryButton.getIconHeight()) {
+  				resetGame();
+  				Runnable thread = () -> {gameLoop();};
+  		    new Thread(thread).start();
+  			}
+  		
+  		// If player clicked quit button (end game)
+  		if (x >= quitButtonPoint.x && x <= quitButtonPoint.x + quitButton.getIconWidth())
+  			if (y >= quitButtonPoint.y && y <= quitButtonPoint.y + quitButton.getIconHeight()) 
+  				System.exit(0);
+  	}
+	}
+	
+  
+  /**
+   * Handles Keyboard input (for player movement)
+   */
+  public void keyPressed(KeyEvent e) {
+    int code = e.getKeyCode();
+    player.setMoveCode(code);
+  }
+  
+  
+  /**
+   * Responsible for painting the majority of images on the screen
+   */
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    parkingLot.getMapImage().paintIcon(this, g, 0, 0);
+    player.getPlayerImage().paintIcon(this, g, player.getPosition().x, player.getPosition().y);
+    display.paintIcon(this, g, -4, 0);
+    currentLevelImage.paintIcon(this, g, 310, 11);
+    // Paint hearts (lives)
+    int temp = 10;
+    for (int i = 0; i < player.getLives(); i++) {
+    	heart.paintIcon(this, g, temp, 117);
+    	temp += 120;
     }
-
-    public void actionPerformed(ActionEvent e) {repaint();}
-    public void keyReleased(KeyEvent e) {}
-    public void keyTyped(KeyEvent e) {}
     
-    public void keyPressed(KeyEvent e) {
-        int code = e.getKeyCode();
-        player.setMoveCode(code);
+    // Paint parked cars
+    for (int i = 0; i < ParkingLot.parkedCars.size(); i++) {
+			ParkingLot.parkedCars.get(i).getImage().paintIcon(this, g, 
+			ParkingLot.parkedCars.get(i).getPosition().x,
+			ParkingLot.parkedCars.get(i).getPosition().y);
     }
-
-    public void paintComponent(Graphics g) {
-      super.paintComponent(g);
-      parkingLot.getMapImage().paintIcon(this, g, 0, 0);
-      player.getPlayerImage().paintIcon(this, g, player.getPosition().x, player.getPosition().y);
       
-      // Paint parked cars
-      for (int i = 0; i < ParkingLot.parkedCars.size(); i++) {
-      	ParkingLot.parkedCars.get(i).getImage().paintIcon(this, g, 
-      			ParkingLot.parkedCars.get(i).getPosition().x,
-      			ParkingLot.parkedCars.get(i).getPosition().y);
+    // Paint moving cars
+    for (int i = 0; i < cars.length; i++) {
+      cars[i].getIcon().paintIcon(this, g, cars[i].getPosition().x, cars[i].getPosition().y);
+    }
+    
+    // Paint completion carts
+    for (int i = 0; i < cartsCompleted.size(); i++) {
+      if (cartsCompleted.get(i) != null) {
+        cartsCompleted.get(i).getIcon().paintIcon(this, g,cartsCompleted.get(i).getPosition().x,
+      		cartsCompleted.get(i).getPosition().y);
       }
-      
-      // Set cars
+    }
+    
+    // Paint Game over UI
+    if (player.getLives() == 0) {
+    	gameOver.paintIcon(this, g, 550, 200);
+    	retryButton.paintIcon(this, g, retryButtonPoint.x, retryButtonPoint.y);
+    	quitButton.paintIcon(this, g, quitButtonPoint.x, quitButtonPoint.y);
+    }
+    
+    // Paint win game UI
+    if (cartAreaFull()) {
+    	youWin.paintIcon(this, g, 550, 200);
+    	retryButton.paintIcon(this, g, retryButtonPoint.x, retryButtonPoint.y);
+    	quitButton.paintIcon(this, g, quitButtonPoint.x, quitButtonPoint.y);
+    }
+  }
+
+  
+  /**
+   * The main game loop which keeps running until the game ends.
+   */
+  private void gameLoop() {
+  	
+    initCars();
+    parkingLot.increaseLevel();
+
+    while (true) {
+    	
+      try {Thread.sleep(GAME_LOOP_PAUSE);} 
+      catch (InterruptedException ex) {
+          Logger.getLogger(Gameplay.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      gameLoopIteration++;
+      //check to see if player is spawned
+      if (!player.isAlive()) {
+        // if not, check to see if player has a life left
+        if (player.getLives() > 0) {
+          player.setAlive(true);
+          player.setPlayerImage();
+        } else {
+          // if player has no life, display game over
+          break;
+        }
+      }
+      //set player position at spawn point
+      if (!player.getSpawned()) {
+          player.setPosition(new Point(player.getSpawnPos().x,
+              player.getSpawnPos().y));
+          player.setSpawned(true);
+      }
+
+      Point playerPostion = player.getPosition();
       for (int i = 0; i < cars.length; i++) {
-        cars[i].getIcon().paintIcon(this, g, cars[i].getPosition().x, cars[i].getPosition().y);
+        Car car = cars[i];
+        // is player hit?
+        if (car.getPosition().x == playerPostion.x
+      		&& car.getPosition().y == playerPostion.y) {
+          // yes- set player spawn to false, continue, set player lives - 1
+      	  player.setLives(player.getLives() - 1);
+          player.setSpawned(false);
+          player.setAlive(false);
+          player.setDeathImage();
+        }
+      }
+
+      if (!player.isAlive()) {continue;}
+      completion:
+      {
+        //check to see if player in shopping cart return area
+        Point p = completionPoints[0];
+        if (p.x == playerPostion.x) {
+        	if (parkingLot.getCurrentLevel() < 9)
+        		currentLevelImage = levelImages[parkingLot.getCurrentLevel()];
+      		parkingLot.increaseLevel();
+          CartCompletion cart = new CartCompletion();
+          cart.setPosition(p);
+          cartsCompleted.add(cart);
+          
+          // add green cart icon to cart area
+          switch (cartsCompleted.size()) {
+            case 1:
+              cart.setPosition(COM_POINT1);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 2:
+              cart.setPosition(COM_POINT2);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 3:
+              cart.setPosition(COM_POINT3);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 4:
+              cart.setPosition(COM_POINT4);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 5:
+              cart.setPosition(COM_POINT5);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 6:
+              cart.setPosition(COM_POINT6);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 7:
+              cart.setPosition(COM_POINT7);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 8:
+              cart.setPosition(COM_POINT8);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            case 9:
+              cart.setPosition(COM_POINT9);
+              player.setSpawned(Boolean.FALSE);
+              break completion;
+            default:
+              break completion;
+          }
+        }
       }
       
-      for (int i = 0; i < cartsCompleted.length; i++) {
-        CartCompletion cart = cartsCompleted[i];
-        if (cart != null) {
-          cartsCompleted[i].getIcon().paintIcon(this, g,
-        	cartsCompleted[i].getPosition().x,
-          cartsCompleted[i].getPosition().y);
+      //if return area is full, win game
+      if (cartAreaFull()) {break;}
+
+      // move player
+      player.move();
+
+      // check to see if cars should move
+      if (gameLoopIteration % CAR_MOVEMENT_ITERATIONS == 0) {
+        // move cars
+        for (int i = 0; i < cars.length; i++) {
+          Car car = cars[i];
+          if (car.getPosition().y == car.getMAX_VERT()) { // TODO: replace 800 with constant for max
+            car.getPosition().y = 0;
+          } else {
+            car.getPosition().y += car.getMoveDistance();
+          }
         }
       }
     }
+  }
 
-    /**
-     * Checks to make sure that the cart area is full.
-     *
-     * @return true if full, false if not
-     */
-    private Boolean cartAreaFull() {
-
-        for (int i = 0; i < cartsCompleted.length; i++) {
-            CartCompletion cart = cartsCompleted[i];
-            if (cart == null) {
-                return false;
-            }
-        }
-        return true;
+  
+  /**
+   * Initializes the cars used in the game.
+   */
+  private void initCars() {
+    for (int i = 0; i < cars.length; i++) {
+      Car car = new Car();
+      if (i == 0) car.setPosition(new Point(CAR1_HOZ, CAR_VER));
+      if (i == 1) car.setPosition(new Point(CAR2_HOZ, CAR_VER + 200));
+      if (i == 2) car.setPosition(new Point(CAR3_HOZ, CAR_VER + 400));
+      if (i == 3) car.setPosition(new Point(CAR4_HOZ, CAR_VER + 600));
+      cars[i] = car;
     }
+  }
+	
 
-    /**
-     * The main game loop which keeps running until the game ends.
-     */
-    private void gameLoop() {
-
-        initCars();
-        parkingLot.increaseLevel();
-
-        // ask player if they want to start a game(for now, assume they do)
-        //if no, exit program
-        // if yes, set life to 3
-        while (true) {
-
-            try {Thread.sleep(GAME_LOOP_PAUSE);} 
-            catch (InterruptedException ex) {
-                Logger.getLogger(Gameplay.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            gameLoopIteration++;
-            //check to see if player is spawned
-            if (!player.isAlive()) {
-                // if no, check to see if player has a life left
-                int lives = player.getLives();
-                if (lives > 0) {
-                    // if player has a life - 1
-                    player.setLives(lives - 1);
-                    player.setAlive(true);
-                    player.setPlayerImage();
-                } else {
-                    //if player has no life, display game over( ask to replay?)
-                    break;
-
-                }
-            }
-            //set player position at spawn point
-            if (!player.getSpawned()) {
-                player.setPosition(new Point(player.getSpawnPos().x,
-                        player.getSpawnPos().y));
-                player.setSpawned(true);
-            }
-
-            Point playerPostion = player.getPosition();
-            for (int i = 0; i < cars.length; i++) {
-                Car car = cars[i];
-                // is player hit?
-                if (car.getPosition().x == playerPostion.x
-                        && car.getPosition().y == playerPostion.y) {
-                    // yes- set player spawn to false, continue
-                    player.setSpawned(false);
-                    player.setAlive(false);
-                    // TODO: bad player sound
-                    player.setDeathImage();
-                }
-
-            }
-
-            //if player dead, continue
-            if (!player.isAlive()) {
-                continue;
-            }
-            completion:
-            {
-                //check to see if player in shopping cart return area
-                Point p = completionPoints[0];
-                if (p.x == playerPostion.x) {
-                    // TODO: make good sound
-                    // set a green
-                		parkingLot.increaseLevel();
-                    CartCompletion cart = new CartCompletion();
-                    cart.setPosition(p);
-                    insertCompletedCart(cart);
-                    // add green cart icon to cart area
-                    switch (getCartsCompleted()) {
-                        case 1:
-                            cart.setPosition(COM_POINT1);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 2:
-                            cart.setPosition(COM_POINT2);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 3:
-                            cart.setPosition(COM_POINT3);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 4:
-                            cart.setPosition(COM_POINT4);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 5:
-                            cart.setPosition(COM_POINT5);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 6:
-                            cart.setPosition(COM_POINT6);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 7:
-                            cart.setPosition(COM_POINT7);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 8:
-                            cart.setPosition(COM_POINT8);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        case 9:
-                            cart.setPosition(COM_POINT9);
-                            player.setSpawned(Boolean.FALSE);
-                            break completion;
-                        default:
-                            break completion;
-
-                    }
-                }
-            }
-            // if in return area, check to see if return area is full
-            //if return area full, win game
-            if (cartAreaFull()) {
-                // TODO: show game win to user
-                // possibly ask to play again
-                break;
-            }
-
-            // move player
-            player.move();
-
-            // check to see if cars should move
-            if (gameLoopIteration % CAR_MOVEMENT_ITERATIONS == 0) {
-                // move cars
-                for (int i = 0; i < cars.length; i++) {
-                    Car car = cars[i];
-                    if (car.getPosition().y == car.getMAX_VERT()) { // TODO: replace 800 with constant for max
-                        car.getPosition().y = 0;
-                    } else {
-                        car.getPosition().y += car.getMoveDistance();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets the completed carts size;
-     *
-     * @return
-     */
-    private int getCartsCompleted() {
-        int size = 0;
-        for (int i = 0; i < cartsCompleted.length; i++) {
-            CartCompletion cart = cartsCompleted[i];
-            if (cart != null) {
-                size++;
-            }
-        }
-        return size;
-    }
-
-    /**
-     * Initializes the cars used in the game.
-     */
-    private void initCars() {
-        //set cars
-        for (int i = 0; i < cars.length; i++) {
-            //instatiate new car
-            Car car = new Car();
-            switch (i) {
-                case 0:
-                    car.setPosition(new Point(CAR1_HOZ, CAR_VER));
-                    break;
-                case 1:
-                    car.setPosition(new Point(CAR2_HOZ, CAR_VER + 200));
-                    break;
-                case 2:
-                    car.setPosition(new Point(CAR3_HOZ, CAR_VER + 400));
-                    break;
-                case 3:
-                    car.setPosition(new Point(CAR4_HOZ, CAR_VER + 600));
-                    break;
-                default:
-                    break;
-
-            }
-            cars[i] = car;
-        }
-    }
-
-    /**
-     * Inserts a cart at the first null element of the list. Doesnt insert if
-     * list is full.
-     *
-     * @param cart cart to insert
-     */
-    private void insertCompletedCart(CartCompletion cart) {
-
-        for (int i = 0; i < cartsCompleted.length; i++) {
-            CartCompletion c = cartsCompleted[i];
-            if (c == null) {
-                cartsCompleted[i] = cart;
-                return;
-            }
-        }
-    }
+  /**
+   * Checks to make sure that the cart area is full.
+   *
+   * @return true if full, false if not
+   */
+  private Boolean cartAreaFull() {
+    if (cartsCompleted.size() == NUM_COMPLETION_POINTS) return true;
+    return false;
+  }
+  
+  
+  private void resetGame () {
+  	player.setLives(player.MAX_LIVES);
+  	parkingLot.reset();
+  	currentLevelImage = levelImages[0];
+  	cartsCompleted.clear();
+  }
 }

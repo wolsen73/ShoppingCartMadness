@@ -14,10 +14,10 @@ public class Player {
 	private final int X_SPAWN = 300;
 	private final int Y_SPAWN = 400;
 	private final int MOVE_DISTANCE = 100;
-	private final int MAX_LIVES = 3;
+	public final int MAX_LIVES = 3;
 	
 	private int lives = MAX_LIVES;
-	private Boolean alive = false;
+	private Boolean alive = true;
 	private Boolean spawned = false;
 	private Integer moveCode;
 	private String moveDirection = "None";
@@ -108,8 +108,8 @@ public class Player {
     }
     else if (moveDirection == "Left") {
         if (playerPos.x == spawnPos.x) return false;
-        if (playerPos.x == (getSpawnPos().x + MOVE_DISTANCE)) 
-          if (spawnPos.y != spawnPos.y && playerPos.y != spawnPos.y + MOVE_DISTANCE) 
+        if (playerPos.x == (spawnPos.x + MOVE_DISTANCE)) 
+          if (playerPos.y != spawnPos.y && playerPos.y != spawnPos.y + MOVE_DISTANCE) 
             return false;
     }
     if(isCollisionDetected()) return false;

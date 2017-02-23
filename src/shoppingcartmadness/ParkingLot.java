@@ -12,10 +12,10 @@ public class ParkingLot {
 	
 //------------------------------------------- Member Fields ----------------------------------------------
 
-	private final int PARKED_CARS_PER_LVL = 2;
   private final ImageIcon MAP = new ImageIcon("ParkingLot.png");
   private final Point MAP_SIZE = new Point(1700, 800);
-  private static int currentLevel = 0;
+  private int carsPerLevel = 1;
+  private int currentLevel = 0;
   
   public static ArrayList<ParkedCar> parkedCars = new ArrayList<ParkedCar>();
   
@@ -28,8 +28,15 @@ public class ParkingLot {
 
 //------------------------------------------- Member Functions -------------------------------------------
     
-  public ImageIcon getMapImage() {return MAP;}
-  public Point getMapSize() {return MAP_SIZE;}
+  public ImageIcon getMapImage () {return MAP;}
+  public Point getMapSize () {return MAP_SIZE;}
+  public int getCurrentLevel () {return currentLevel;}
+  
+  public void reset () {
+  	currentLevel = 0;
+  	carsPerLevel = 1;
+  	parkedCars.clear();
+  }
   
   private int getRowIndex () {
 		return ThreadLocalRandom.current().nextInt(0, rows.length);
@@ -46,7 +53,8 @@ public class ParkingLot {
   public void increaseLevel () { 
   	currentLevel++;
   	Point spawn;
-  	for (int i = 0; i < PARKED_CARS_PER_LVL; i++) {
+  	if (currentLevel == 5) carsPerLevel = 2;
+  	for (int i = 0; i < carsPerLevel; i++) {
   		do {
   			spawn = new Point (safeColumns[getSafeColumnIndex()], rows[getRowIndex()]);
   		} while (isValidParkingSpot(spawn));
