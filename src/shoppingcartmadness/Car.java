@@ -6,6 +6,7 @@ import javax.swing.ImageIcon;
 /**
  *
  * @author Lunelune
+ * @update will.olsen
  */
 
 public class Car {
