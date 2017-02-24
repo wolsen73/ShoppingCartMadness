@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.*;
 
 //---------------------------------------------- Gameplay Class ----------------------------------------------
@@ -14,12 +15,17 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 
     public static int FRAME_HEIGHT = 940;
     public static int FRAME_WIDTH = 1800;
-    private static int CAR1_HOZ = 400;
-    private static int CAR2_HOZ = 700;
-    private static int CAR3_HOZ = 1100;
-    private static int CAR4_HOZ = 1500;
+    private static int CAR1_DOWN_HOZ = 400;
+    private static int CAR1_UP_HOZ = 500;
+    private static int CAR2_DOWN_HOZ = 700;
+    private static int CAR2_UP_HOZ = 800;
+    private static int CAR3_DOWN_HOZ = 1100;
+    private static int CAR3_UP_HOZ = 1200;
+    private static int CAR4_DOWN_HOZ = 1500;
+    private static int CAR4_UP_HOZ = 1600;
     private static int CAR_MOVEMENT_ITERATIONS = 15; // every 1 second (5 loops) move the cars
-    private static int CAR_VER = 0;
+    private static int CAR_VER_DOWN = 0;
+    private static int CAR_VER_UP = 800;
     private static Point COM_POINT1 = new Point(1700, 0);
     private static Point COM_POINT2 = new Point(1700, 100);
     private static Point COM_POINT3 = new Point(1700, 200);
@@ -40,7 +46,8 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
     private Point retryButtonPoint = new Point (500, 500); 
     private Point quitButtonPoint = new Point (1000, 500);
     
-    private Car[] cars = new Car[4];// change to constant
+    private MovingCar[] carsMovingDown = new MovingCar[4];// change to constant
+    private MovingCar[] carsMovingUp = new MovingCar[4];
     private ArrayList<CartCompletion> cartsCompleted = 
     		new ArrayList<CartCompletion>(NUM_COMPLETION_POINTS);
     private Point[] completionPoints = {COM_POINT1, COM_POINT2, COM_POINT3, COM_POINT4,
@@ -137,9 +144,18 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 			ParkingLot.parkedCars.get(i).getPosition().y);
     }
       
-    // Paint moving cars
-    for (int i = 0; i < cars.length; i++) {
-      cars[i].getIcon().paintIcon(this, g, cars[i].getPosition().x, cars[i].getPosition().y);
+    // Paint cars moving Down
+    for (int i = 0; i < carsMovingDown.length; i++) {
+    	carsMovingDown[i].getDownIcon().paintIcon(this, g, 
+    	carsMovingDown[i].getPosition().x, 
+    	carsMovingDown[i].getPosition().y);
+    }
+    
+    // Paint cars moving Up
+    for (int i = 0; i < carsMovingUp.length; i++) {
+    	carsMovingUp[i].getUpIcon().paintIcon(this, g, 
+    	carsMovingUp[i].getPosition().x, 
+    	carsMovingUp[i].getPosition().y);  
     }
     
     // Paint completion carts
@@ -200,8 +216,8 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       }
 
       Point playerPostion = player.getPosition();
-      for (int i = 0; i < cars.length; i++) {
-        Car car = cars[i];
+      for (int i = 0; i < carsMovingDown.length; i++) {
+        MovingCar car = carsMovingDown[i];
         // is player hit?
         if (car.getPosition().x == playerPostion.x
       		&& car.getPosition().y == playerPostion.y) {
@@ -225,44 +241,54 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
           CartCompletion cart = new CartCompletion();
           cart.setPosition(p);
           cartsCompleted.add(cart);
+        
           
           // add green cart icon to cart area
           switch (cartsCompleted.size()) {
             case 1:
               cart.setPosition(COM_POINT1);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 13;
               break completion;
             case 2:
               cart.setPosition(COM_POINT2);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 11;
               break completion;
             case 3:
               cart.setPosition(COM_POINT3);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 9;
               break completion;
             case 4:
               cart.setPosition(COM_POINT4);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 8;
               break completion;
             case 5:
               cart.setPosition(COM_POINT5);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 7;
               break completion;
             case 6:
               cart.setPosition(COM_POINT6);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS =6;
               break completion;
             case 7:
               cart.setPosition(COM_POINT7);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 5;
               break completion;
             case 8:
               cart.setPosition(COM_POINT8);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 4;
               break completion;
             case 9:
               cart.setPosition(COM_POINT9);
               player.setSpawned(Boolean.FALSE);
+              CAR_MOVEMENT_ITERATIONS = 3;
               break completion;
             default:
               break completion;
@@ -275,16 +301,25 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 
       // move player
       player.move();
-
+      
       // check to see if cars should move
+    
       if (gameLoopIteration % CAR_MOVEMENT_ITERATIONS == 0) {
         // move cars
-        for (int i = 0; i < cars.length; i++) {
-          Car car = cars[i];
-          if (car.getPosition().y == car.getMAX_VERT()) { // TODO: replace 800 with constant for max
-            car.getPosition().y = 0;
-          } else {
-            car.getPosition().y += car.getMoveDistance();
+        for (int i = 0; i < carsMovingDown.length; i++) {
+          MovingCar carDown = carsMovingDown[i];
+          MovingCar carUp = carsMovingUp[i];
+          if (carDown.getPosition().y == carDown.getMAX_VERT()) {
+        	  carDown.getPosition().y = 0;
+          }
+          else {
+        	  carDown.getPosition().y += carDown.getMoveDistanceDown();
+          }
+          if (carUp.getPosition().y == carUp.getMIN_VERT()) {
+        	  carUp.getPosition().y = 800;
+          }
+          else {
+        	  carUp.getPosition().y += carUp.getMoveDistancUp();
           }
         }
       }
@@ -294,15 +329,26 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
   
   /**
    * Initializes the cars used in the game.
+   * int test = ((int) (Math.random() * 700))%100;
+int test1 = test - test%100;
+test1
    */
   private void initCars() {
-    for (int i = 0; i < cars.length; i++) {
-      Car car = new Car();
-      if (i == 0) car.setPosition(new Point(CAR1_HOZ, CAR_VER));
-      if (i == 1) car.setPosition(new Point(CAR2_HOZ, CAR_VER + 200));
-      if (i == 2) car.setPosition(new Point(CAR3_HOZ, CAR_VER + 400));
-      if (i == 3) car.setPosition(new Point(CAR4_HOZ, CAR_VER + 600));
-      cars[i] = car;
+    for (int i = 0; i < carsMovingDown.length; i++) {
+      MovingCar carDown = new MovingCar();
+      if (i == 0) carDown.setPosition(new Point(CAR1_DOWN_HOZ, CAR_VER_DOWN));
+      if (i == 1) carDown.setPosition(new Point(CAR2_DOWN_HOZ, CAR_VER_DOWN + 200));
+      if (i == 2) carDown.setPosition(new Point(CAR3_DOWN_HOZ, CAR_VER_DOWN + 400));
+      if (i == 3) carDown.setPosition(new Point(CAR4_DOWN_HOZ, CAR_VER_DOWN + 600));
+      carsMovingDown[i] = carDown;
+    }
+      for (int i = 0; i < carsMovingUp.length; i++) {
+          MovingCar carUp = new MovingCar();
+          if (i == 0) carUp.setPosition(new Point(CAR1_UP_HOZ, CAR_VER_UP));
+          if (i == 1) carUp.setPosition(new Point(CAR2_UP_HOZ, CAR_VER_UP + 100));
+          if (i == 2) carUp.setPosition(new Point(CAR3_UP_HOZ, CAR_VER_UP + 300));
+          if (i == 3) carUp.setPosition(new Point(CAR4_UP_HOZ, CAR_VER_UP + 500));
+      carsMovingUp[i] = carUp;
     }
   }
 	

@@ -34,7 +34,7 @@ public class ParkingLot {
   
   public void reset () {
   	currentLevel = 0;
-  	carsPerLevel = 1;
+  	carsPerLevel = 3;
   	parkedCars.clear();
   }
   
@@ -53,7 +53,7 @@ public class ParkingLot {
   public void increaseLevel () { 
   	currentLevel++;
   	Point spawn;
-  	if (currentLevel == 5) carsPerLevel = 2;
+  	if (currentLevel >= 3) carsPerLevel = 2;
   	for (int i = 0; i < carsPerLevel; i++) {
   		do {
   			spawn = new Point (safeColumns[getSafeColumnIndex()], rows[getRowIndex()]);
