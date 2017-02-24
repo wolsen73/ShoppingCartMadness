@@ -217,10 +217,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 
       Point playerPostion = player.getPosition();
       for (int i = 0; i < carsMovingDown.length; i++) {
-        MovingCar car = carsMovingDown[i];
+        MovingCar carDown = carsMovingDown[i];
+        MovingCar carUp = carsMovingUp[i];
         // is player hit?
-        if (car.getPosition().x == playerPostion.x
-      		&& car.getPosition().y == playerPostion.y) {
+        if (carDown.getPosition().x == playerPostion.x
+      		&& carDown.getPosition().y == playerPostion.y || 
+      		carUp.getPosition().x == playerPostion.x
+      		&& carUp.getPosition().y == playerPostion.y) {
           // yes- set player spawn to false, continue, set player lives - 1
       	  player.setLives(player.getLives() - 1);
           player.setSpawned(false);
