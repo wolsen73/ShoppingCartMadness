@@ -373,5 +373,6 @@ test1
   	parkingLot.reset();
   	currentLevelImage = levelImages[0];
   	cartsCompleted.clear();
+  	CAR_MOVEMENT_ITERATIONS = 15;
   }
 }
