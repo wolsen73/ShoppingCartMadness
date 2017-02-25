@@ -368,7 +368,6 @@ test1
     return false;
   }
   
-  
   private void resetGame () {
   	player.setLives(player.MAX_LIVES);
   	player.setPosition(new Point(player.getSpawnPos().x,
