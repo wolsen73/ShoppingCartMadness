@@ -45,14 +45,14 @@ public class MovingCar {
     /**
      * @return the MAX_VERT
      */
-    public static int getMAX_VERT() {
+    public int getMAX_VERT() {
         return MAX_VERT;
     }
     
     /**
      * @return the MAX_VERT
      */
-    public static int getMIN_VERT() {
+    public int getMIN_VERT() {
         return MIN_VERT;
     }
 

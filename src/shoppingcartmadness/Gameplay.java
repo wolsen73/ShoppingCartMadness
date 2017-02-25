@@ -117,7 +117,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
    */
   public void keyPressed(KeyEvent e) {
     int code = e.getKeyCode();
-    player.setMoveCode(code);
+    if(player.canMove()) player.setMoveCode(code);
   }
   
   
@@ -192,7 +192,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 
     while (true) {
     	
-      try {Thread.sleep(GAME_LOOP_PAUSE);} 
+    	try {Thread.sleep(GAME_LOOP_PAUSE);} 
       catch (InterruptedException ex) {
           Logger.getLogger(Gameplay.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -210,10 +210,11 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       }
       //set player position at spawn point
       if (!player.getSpawned()) {
-          player.setPosition(new Point(player.getSpawnPos().x,
-          player.getSpawnPos().y));
+          player.setSpawnPos();
           player.setSpawned(true);
+          player.setCanMove(true);
       }
+      
       /*
        * Code for detecting if the player has been hit by a car
        * Also controls the spawn of the player after getting hit.
@@ -223,11 +224,12 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
         MovingCar carDown = carsMovingDown[i];
         MovingCar carUp = carsMovingUp[i];
         // is player hit?
-        if (carDown.getPosition().x == playerPostion.x
-      		&& carDown.getPosition().y == playerPostion.y || 
-      		carUp.getPosition().x == playerPostion.x
-      		&& carUp.getPosition().y == playerPostion.y) {
+        if (carDown.getPosition().x == playerPostion.x && carDown.getPosition().y == playerPostion.y || 
+      		carUp.getPosition().x == playerPostion.x && carUp.getPosition().y == playerPostion.y) {
           // yes- set player spawn to false, continue, set player lives - 1 
+        	player.setCanMove(false);
+        	player.setSpawned(false);
+        	player.setAlive(false);
         	player.setLives(player.getLives() - 1);
         	player.setDeathImage();
         //Move cars and wait to spawn player.
@@ -244,15 +246,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
         		else {
         			carUp.getPosition().y += -100;
         		} 
-        		player.waitSpawn(); 
+        		try {Thread.sleep(100);} 
+        	  catch (InterruptedException e) {e.printStackTrace();}
         	}
-        	// spawn player
-        	player.setSpawned(false);
-    		player.setAlive(false);
         }
-        }
+      }
 
-      if (!player.isAlive()) {continue;}
+      if (!player.isAlive()) {gameLoop(); break;}
       completion:
       {
         //check to see if player in shopping cart return area
@@ -371,13 +371,13 @@ test1
       if (i == 3) carDown.setPosition(new Point(CAR4_DOWN_HOZ, CAR_VER_DOWN + 600));
       carsMovingDown[i] = carDown;
     }
-      for (int i = 0; i < carsMovingUp.length; i++) {
-          MovingCar carUp = new MovingCar();
-          if (i == 0) carUp.setPosition(new Point(CAR1_UP_HOZ, CAR_VER_UP));
-          if (i == 1) carUp.setPosition(new Point(CAR2_UP_HOZ, CAR_VER_UP + 100));
-          if (i == 2) carUp.setPosition(new Point(CAR3_UP_HOZ, CAR_VER_UP + 300));
-          if (i == 3) carUp.setPosition(new Point(CAR4_UP_HOZ, CAR_VER_UP + 500));
-      carsMovingUp[i] = carUp;
+	  for (int i = 0; i < carsMovingUp.length; i++) {
+      MovingCar carUp = new MovingCar();
+      if (i == 0) carUp.setPosition(new Point(CAR1_UP_HOZ, CAR_VER_UP));
+      if (i == 1) carUp.setPosition(new Point(CAR2_UP_HOZ, CAR_VER_UP + 100));
+      if (i == 2) carUp.setPosition(new Point(CAR3_UP_HOZ, CAR_VER_UP + 300));
+      if (i == 3) carUp.setPosition(new Point(CAR4_UP_HOZ, CAR_VER_UP + 500));
+	  carsMovingUp[i] = carUp;
     }
   }
 	
@@ -394,9 +394,10 @@ test1
   
   private void resetGame () {
   	player.setLives(player.MAX_LIVES);
-  	player.setPosition(new Point(player.getSpawnPos().x,
-    player.getSpawnPos().y));
+  	player.setSpawnPos();
     player.setSpawned(true);
+    player.setCanMove(true);
+    player.setPlayerImage();
   	parkingLot.reset();
   	currentLevelImage = levelImages[0];
   	cartsCompleted.clear();

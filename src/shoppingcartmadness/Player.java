@@ -19,6 +19,7 @@ public class Player {
 	private int lives = MAX_LIVES;
 	private Boolean alive = true;
 	private Boolean spawned = false;
+	private boolean canMove = true;
 	private Integer moveCode;
 	private String moveDirection = "None";
 	private ParkingLot parkingLot = new ParkingLot();
@@ -34,9 +35,10 @@ public class Player {
     
   public Boolean isAlive () {return alive;}
   public void setAlive (Boolean alive) {this.alive = alive;}
-  
   public Boolean getSpawned() {return spawned;}
   public void setSpawned(Boolean spawned) {this.spawned = spawned;}
+  public void setCanMove (boolean canMove) {this.canMove = canMove;}
+  public boolean canMove () {return canMove;}
   
   public int getLives () {return lives;}
   public void setLives(int lives) {this.lives = lives;}
@@ -49,8 +51,8 @@ public class Player {
   public void setDeathImage () {playerImage = deathImage;}
   
   public Point getPosition() {return playerPos;}
-  public void setPosition (Point playerPos) {this.playerPos = playerPos;}
-  public Point getSpawnPos() {return spawnPos;}
+  public void setSpawnPos () {playerPos.setLocation(spawnPos);}
+
 
 //--------------------------------------------------------------------------------------------------------
 // Functions: move, moveUp, moveDown, moveRight, moveLeft
@@ -58,14 +60,14 @@ public class Player {
 //             to determine if the move is valid.
 //--------------------------------------------------------------------------------------------------------
   public void move() {
-  	movePosition.setLocation(playerPos);
-    Integer code = this.getMoveCode();
-    if (code == null) return;
-    if (code == KeyEvent.VK_UP) this.moveUp();
-    if (code == KeyEvent.VK_DOWN) this.moveDown();
-    if (code == KeyEvent.VK_LEFT) this.moveLeft();
-    if (code == KeyEvent.VK_RIGHT) this.moveRight();
-    this.setMoveCode(null);
+			movePosition.setLocation(playerPos);
+		  Integer code = this.getMoveCode();
+		  if (code == null) return;
+		  if (code == KeyEvent.VK_UP) this.moveUp();
+		  if (code == KeyEvent.VK_DOWN) this.moveDown();
+		  if (code == KeyEvent.VK_LEFT) this.moveLeft();
+		  if (code == KeyEvent.VK_RIGHT) this.moveRight();
+		  this.setMoveCode(null);
   }
   public void moveDown() {
     moveDirection = "Down";
@@ -87,14 +89,7 @@ public class Player {
     movePosition.y -= MOVE_DISTANCE;
     if (isValidMove()) playerPos.setLocation(movePosition);
   }
-  
-  public void waitSpawn () {
-	  try {
-		  Thread.sleep(500);
-	  } catch (InterruptedException e) {
-		  e.printStackTrace();
-	  }
-  }
+ 
 
 //--------------------------------------------------------------------------------------------------------
 // Function: isValidMove
@@ -108,7 +103,7 @@ public class Player {
       if (playerPos.y == 0) return false;
     } 
     else if (moveDirection == "Down") {
-      if (playerPos.x == getSpawnPos().x && playerPos.y == spawnPos.y + MOVE_DISTANCE) return false;
+      if (playerPos.x == spawnPos.x && playerPos.y == spawnPos.y + MOVE_DISTANCE) return false;
       if (playerPos.y == parkingLot.getMapSize().y) return false;
     } 
     else if (moveDirection == "Right") {

@@ -14,7 +14,7 @@ public class ParkingLot {
 
   private final ImageIcon MAP = new ImageIcon("ParkingLot.png");
   private final Point MAP_SIZE = new Point(1700, 800);
-  private int carsPerLevel = 2;
+  private int carsPerLevel = 1;
   private int currentLevel = 0;
   
   public static ArrayList<ParkedCar> parkedCars = new ArrayList<ParkedCar>();
@@ -24,7 +24,7 @@ public class ParkingLot {
       //1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800};
   
   public final int[] safeColumns = {600, 900, 1000, 1300, 1400};
-  public final int[] rows = {0, 100, 200, 300, 400, 500, 600, 700, 800};
+  public final int[] rows = {0, 100, 200, 300, 400, 500, 600, 700};
 
 //------------------------------------------- Member Functions -------------------------------------------
     
@@ -34,7 +34,7 @@ public class ParkingLot {
   
   public void reset () {
   	currentLevel = 0;
-  	carsPerLevel = 5;
+  	carsPerLevel = 1;
   	parkedCars.clear();
   }
   
