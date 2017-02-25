@@ -225,14 +225,27 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       		carUp.getPosition().x == playerPostion.x
       		&& carUp.getPosition().y == playerPostion.y) {
           // yes- set player spawn to false, continue, set player lives - 1 
-      	  player.setLives(player.getLives() - 1);
-      	  player.setDeathImage();
-      	  player.waitSpawn(); // TODO this needs to be looked into for a better method.
-          player.setSpawned(false);
-          player.setAlive(false);
-          
+        	player.setLives(player.getLives() - 1);
+        	player.setDeathImage();
+        	for ( int j = 0; j < 5; j++) {
+        		if (carDown.getPosition().y == carDown.getMAX_VERT()) {
+        			carDown.getPosition().y = 0;
+        		}
+        		else {
+        			carDown.getPosition().y += 100;
+        		}
+        		if (carUp.getPosition().y == carUp.getMIN_VERT()) {
+        			carUp.getPosition().y = 800;
+        		}
+        		else {
+        			carUp.getPosition().y += -100;
+        		} 
+        		player.waitSpawn(); 
+        	}
+        	player.setSpawned(false);
+    		player.setAlive(false);
         }
-      }
+        }
 
       if (!player.isAlive()) {continue;}
       completion:
@@ -308,7 +321,6 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       player.move();
       
       // check to see if cars should move
-    
       if (gameLoopIteration % CAR_MOVEMENT_ITERATIONS == 0) {
         // move cars
         for (int i = 0; i < carsMovingDown.length; i++) {
