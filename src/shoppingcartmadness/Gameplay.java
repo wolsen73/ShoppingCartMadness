@@ -214,7 +214,10 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
           player.getSpawnPos().y));
           player.setSpawned(true);
       }
-
+      /*
+       * Code for detecting if the player has been hit by a car
+       * Also controls the spawn of the player after getting hit.
+       */
       Point playerPostion = player.getPosition();
       for (int i = 0; i < carsMovingDown.length; i++) {
         MovingCar carDown = carsMovingDown[i];
@@ -227,6 +230,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
           // yes- set player spawn to false, continue, set player lives - 1 
         	player.setLives(player.getLives() - 1);
         	player.setDeathImage();
+        //Move cars and wait to spawn player.
         	for ( int j = 0; j < 5; j++) {
         		if (carDown.getPosition().y == carDown.getMAX_VERT()) {
         			carDown.getPosition().y = 0;
@@ -242,6 +246,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
         		} 
         		player.waitSpawn(); 
         	}
+        	// spawn player
         	player.setSpawned(false);
     		player.setAlive(false);
         }
@@ -259,9 +264,12 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
           CartCompletion cart = new CartCompletion();
           cart.setPosition(p);
           cartsCompleted.add(cart);
-        
-          
-          // add green cart icon to cart area
+     
+          /*
+           *  add green cart icon to cart area
+           *  update CAR_MOVEMENT_ITERATIONS as as each level is achieved
+           *  this increases speed of cars with each level
+           */
           switch (cartsCompleted.size()) {
             case 1:
               cart.setPosition(COM_POINT1);
@@ -319,7 +327,11 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
 
       // move player
       player.move();
-      
+      /*
+       * Controls the motion of the cars, speed of cars is based on
+       * the value of the CAR_MOVEMENT_ITERATIONS. The value is changed
+       * as the player progresses through levels.
+       */
       // check to see if cars should move
       if (gameLoopIteration % CAR_MOVEMENT_ITERATIONS == 0) {
         // move cars
