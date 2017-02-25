@@ -23,7 +23,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
     private static int CAR3_UP_HOZ = 1200;
     private static int CAR4_DOWN_HOZ = 1500;
     private static int CAR4_UP_HOZ = 1600;
-    private static int CAR_MOVEMENT_ITERATIONS = 15; // every 1 second (5 loops) move the cars
+    private static int CAR_MOVEMENT_ITERATIONS = 15; // every 1 second (5 loops) move the cars, this gets modified based on level
     private static int CAR_VER_DOWN = 0;
     private static int CAR_VER_UP = 800;
     private static Point COM_POINT1 = new Point(1700, 0);
@@ -369,6 +369,7 @@ test1
   
   private void resetGame () {
   	player.setLives(player.MAX_LIVES);
+  	player.setSpawned(Boolean.FALSE);
   	parkingLot.reset();
   	currentLevelImage = levelImages[0];
   	cartsCompleted.clear();

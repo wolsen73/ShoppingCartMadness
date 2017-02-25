@@ -38,8 +38,8 @@ public class MovingCar {
 	}
 	
     
-    private final int moveDistanceDown = 100;
-    private final int moveDistanceUp = -100;
+    private int moveDistanceDown = 100;
+    private int moveDistanceUp = -100;
     private Point position;
 
     /**
@@ -71,6 +71,10 @@ public class MovingCar {
      * @return the move down Distance
      */
     public int getMoveDistanceDown() {
+    	moveDistanceDown = ThreadLocalRandom.current().nextInt(50, 200);
+    	int randomizer = moveDistanceDown % 100;
+    	moveDistanceDown = moveDistanceDown - randomizer;
+    	System.out.println("DOWN " + moveDistanceDown);
         return moveDistanceDown;
     }
     
@@ -78,6 +82,10 @@ public class MovingCar {
      * @return the move up Distance
      */
     public int getMoveDistancUp() {
+    	moveDistanceUp = ThreadLocalRandom.current().nextInt(-200, -50);
+    	int randomizer = moveDistanceUp % 100;
+    	moveDistanceUp = moveDistanceUp - randomizer;
+    	System.out.println("UP " + moveDistanceUp);
         return moveDistanceUp;
     }
 
