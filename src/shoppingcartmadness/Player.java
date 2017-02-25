@@ -87,6 +87,14 @@ public class Player {
     movePosition.y -= MOVE_DISTANCE;
     if (isValidMove()) playerPos.setLocation(movePosition);
   }
+  
+  public void waitSpawn () {
+	  try {
+		Thread.sleep(1000);
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	}
+  }
 
 //--------------------------------------------------------------------------------------------------------
 // Function: isValidMove

@@ -211,7 +211,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       //set player position at spawn point
       if (!player.getSpawned()) {
           player.setPosition(new Point(player.getSpawnPos().x,
-              player.getSpawnPos().y));
+          player.getSpawnPos().y));
           player.setSpawned(true);
       }
 
@@ -224,11 +224,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
       		&& carDown.getPosition().y == playerPostion.y || 
       		carUp.getPosition().x == playerPostion.x
       		&& carUp.getPosition().y == playerPostion.y) {
-          // yes- set player spawn to false, continue, set player lives - 1
+          // yes- set player spawn to false, continue, set player lives - 1 
       	  player.setLives(player.getLives() - 1);
+      	  player.setDeathImage();
+      	  player.waitSpawn(); // TODO this needs to be looked into for a better method.
           player.setSpawned(false);
           player.setAlive(false);
-          player.setDeathImage();
+          
         }
       }
 
@@ -369,7 +371,9 @@ test1
   
   private void resetGame () {
   	player.setLives(player.MAX_LIVES);
-  	player.setSpawned(Boolean.FALSE);
+  	player.setPosition(new Point(player.getSpawnPos().x,
+    player.getSpawnPos().y));
+    player.setSpawned(true);
   	parkingLot.reset();
   	currentLevelImage = levelImages[0];
   	cartsCompleted.clear();

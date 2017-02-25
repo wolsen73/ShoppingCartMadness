@@ -14,7 +14,7 @@ public class ParkingLot {
 
   private final ImageIcon MAP = new ImageIcon("ParkingLot.png");
   private final Point MAP_SIZE = new Point(1700, 800);
-  private int carsPerLevel = 3;
+  private int carsPerLevel = 2;
   private int currentLevel = 0;
   
   public static ArrayList<ParkedCar> parkedCars = new ArrayList<ParkedCar>();
@@ -53,7 +53,7 @@ public class ParkingLot {
   public void increaseLevel () { 
   	currentLevel++;
   	Point spawn;
-  	if (currentLevel >= 3) carsPerLevel = 3;
+  	if (currentLevel >= 3) carsPerLevel = 2;
   	for (int i = 0; i < carsPerLevel; i++) {
   		do {
   			spawn = new Point (safeColumns[getSafeColumnIndex()], rows[getRowIndex()]);
