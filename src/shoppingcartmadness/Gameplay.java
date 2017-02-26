@@ -338,13 +338,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
         for (int i = 0; i < carsMovingDown.length; i++) {
           MovingCar carDown = carsMovingDown[i];
           MovingCar carUp = carsMovingUp[i];
-          if (carDown.getPosition().y == carDown.getMAX_VERT()) {
+          if (carDown.getPosition().y >= carDown.getMAX_VERT()) {
         	  carDown.getPosition().y = 0;
           }
           else {
         	  carDown.getPosition().y += carDown.getMoveDistanceDown();
           }
-          if (carUp.getPosition().y == carUp.getMIN_VERT()) {
+          if (carUp.getPosition().y <= carUp.getMIN_VERT()) {
         	  carUp.getPosition().y = 800;
           }
           else {
