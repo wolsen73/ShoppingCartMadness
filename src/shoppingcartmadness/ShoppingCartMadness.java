@@ -4,6 +4,8 @@ import javax.swing.JFrame;
 
 public class ShoppingCartMadness {
 
+//--------------------------------------------- Main Method --------------------------------------------	
+	
     public static void main(String[] args) {
 
         JFrame frame = new JFrame();
@@ -13,6 +15,6 @@ public class ShoppingCartMadness {
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(Gameplay.FRAME_WIDTH, Gameplay.FRAME_HEIGHT);
+        frame.setSize(1800, 940);
     }
 }
