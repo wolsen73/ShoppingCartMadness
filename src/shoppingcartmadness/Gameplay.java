@@ -211,7 +211,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
         		if (carDown.getPosition().y == carDown.getMAX_VERT()) carDown.getPosition().y = 0;
         		else carDown.getPosition().y += 100;
 
-        		if (carUp.getPosition().y == carUp.getMIN_VERT()) carUp.getPosition().y = 800;
+        		if (carUp.getPosition().y <= carUp.getMIN_VERT()) carUp.getPosition().y = 800;
         		else carUp.getPosition().y += -100;
         		
         		try {Thread.sleep(100);} 
@@ -241,7 +241,7 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener, Mou
           
           if (carDown.getPosition().y == carDown.getMAX_VERT()) carDown.getPosition().y = 0;
           else carDown.getPosition().y += carDown.getMoveDistanceDown();
-          if (carUp.getPosition().y == carUp.getMIN_VERT()) carUp.getPosition().y = 800;
+          if (carUp.getPosition().y <= carUp.getMIN_VERT()) carUp.getPosition().y = 800;
           else carUp.getPosition().y += carUp.getMoveDistancUp();
         }
       }
